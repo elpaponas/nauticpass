@@ -1,0 +1,18 @@
+/* EntregaBoletos.css */
+
+.verificado input {
+    border-color: #10b981; /* Color verde cuando está verificado */
+  }
+  
+  .verificado .text-green-500 {
+    color: #10b981; /* Color del icono verde cuando está verificado */
+  }
+  
+  .no-verificado input {
+    border-color: #d1d5db; /* Color gris por defecto */
+  }
+  
+  .no-verificado .text-gray-400 {
+    color: #d1d5db; /* Color del icono gris por defecto */
+  }
+  
