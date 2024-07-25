@@ -44,3 +44,25 @@
 
 /* Puedes añadir estilos adicionales aquí si es necesario */
 
+/* src/App.css o en un archivo CSS específico para tu componente */
+.modal-form .modal-dialog {
+  max-width: 500px; /* Ajusta el ancho según tus necesidades */
+  margin: 1.75rem auto; /* Centra verticalmente en la pantalla */
+}
+
+.modal-form .modal-content {
+  padding: 20px; /* Espaciado interno del modal */
+}
+
+.modal-form .modal-header,
+.modal-form .modal-footer {
+  border: none; /* Opcional: quita el borde del modal */
+}
+
+.modal-form .modal-body {
+  padding: 1.5rem; /* Ajusta el espaciado interno del cuerpo del modal */
+}
+
+.modal-form .form-group {
+  margin-bottom: 1rem; /* Espaciado inferior del grupo de formulario */
+}

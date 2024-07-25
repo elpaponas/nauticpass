@@ -1,6 +1,8 @@
+// src/Navbar.js
 import React from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { FiSettings } from 'react-icons/fi'; // Importamos el ícono de ajustes desde react-icons
+import LogoutButton from './LogoutButton'; // Asegúrate de que el archivo esté en la misma carpeta
 
 function Navbar() {
   return (
@@ -21,6 +23,11 @@ function Navbar() {
           <CustomNavLink to="/consultaentregas">Historial de Boletos</CustomNavLink>
           <CustomNavLink to="/entregaboletos">Entrega de Boletos</CustomNavLink>
         </div>
+
+        {/* Botón de cierre de sesión */}
+        <div className="ml-6">
+          <LogoutButton />
+        </div>
       </div>
     </nav>
   );
@@ -31,7 +38,9 @@ const CustomNavLink = ({ to, children }) => (
   <NavLink
     to={to}
     className="text-white hover:text-gray-200 transition duration-300 ease-in-out font-medium px-3 py-2 relative"
-    activeClassName="border-b-2 border-white"
+    style={({ isActive }) => ({
+      borderBottom: isActive ? '2px solid white' : 'none',
+    })}
   >
     {children}
   </NavLink>

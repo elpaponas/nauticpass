@@ -22,6 +22,10 @@ function EntregaBoletos() {
   const [showCompletionAlert, setShowCompletionAlert] = useState(false);
   const [showErrorAlert, setShowErrorAlert] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [usuarioData, setUsuarioData] = useState({
+    nombres: '',
+    apellidos: ''
+  });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -48,8 +52,27 @@ function EntregaBoletos() {
     }
   };
 
+  const fetchUsuarioData = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/usuarios/me'); // Reemplaza con el endpoint correcto
+      const { nombres, apellidos } = response.data;
+      setUsuarioData({ nombres, apellidos });
+    } catch (error) {
+      console.error('Error al obtener datos del usuario:', error);
+      // Manejo del error
+    }
+  };
+
+  useEffect(() => {
+    fetchUsuarioData();
+    if (formData.numeroColega !== '') {
+      fetchColaboradorData();
+    }
+  }, [formData.numeroColega]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    fetchColaboradorData(); // Asegúrate de que los datos del colega estén actualizados
     setShowModal(true);
   };
 
@@ -97,7 +120,7 @@ function EntregaBoletos() {
     if (showErrorAlert) {
       timer = setTimeout(() => {
         setShowErrorAlert(false);
-      }, 1000); // Tiempo en milisegundos (3 segundos en este caso)
+      }, 1000); // Tiempo en milisegundos (1 segundo en este caso)
     }
     return () => clearTimeout(timer);
   }, [showErrorAlert]);
@@ -108,7 +131,7 @@ function EntregaBoletos() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
-         style={{ backgroundImage: 'url(/img/fondo.jpg)', backgroundSize: 'cover', backgroundAttachment: 'fixed' }}>
+         style={{ backgroundImage: 'url(/img/barco.jpg)', backgroundSize: 'cover', backgroundAttachment: 'fixed' }}>
       <div className="bg-white p-4 rounded-lg shadow-md w-full max-w-md bg-opacity-60">
         <div className="text-center mb-4">
           <h1 className="text-2xl font-bold">Entrega de Boletos</h1>
@@ -197,62 +220,42 @@ function EntregaBoletos() {
               <Form.Group className="mb-3">
                 <Form.Label className="mb-1">Tipo de Boleto</Form.Label>
                 <Form.Control
-                  as="select"
+                  type="text"
                   name="tipoBoleto"
                   value={formData.tipoBoleto}
                   onChange={handleChange}
                   className="rounded-full px-3 py-2 border border-gray-300 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 w-full text-center"
                   required
-                >
-                  <option value="">Seleccionar Tipo</option>
-                  <option value="Sencillo">Sencillo</option>
-                  <option value="Redondo">Redondo</option>
-                </Form.Control>
+                />
               </Form.Group>
-              <div className="flex justify-center">
-                <Button
-                  variant="primary"
-                  onClick={fetchColaboradorData}
-                  className="w-full py-2 rounded-full bg-blue-500 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 mt-4 mr-2"
-                >
-                  Obtener Datos
-                </Button>
-                <Button
-                  variant="primary"
-                  type="submit"
-                  className="w-full py-2 rounded-full bg-blue-500 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 mt-4 ml-2"
-                >
-                  Entregar
-                </Button>
-              </div>
+              <Button type="submit" className="w-full py-2 px-4 bg-blue-500 text-white rounded-full hover:bg-blue-600">
+                Confirmar
+              </Button>
             </Form>
           </Card.Body>
         </Card>
+
         {showModal && (
-          <div className="fixed inset-0 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 shadow-lg max-w-md w-full">
-              <h2 className="text-center text-xl font-bold mb-4">Confirmar Código</h2>
-              <input
-                type="text"
-                className="rounded-full px-3 py-2 border border-gray-300 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 w-full text-center mb-4"
-                placeholder="Ingrese el código de confirmación"
-                value={codigoIngresado}
-                onChange={handleCodigoChange}
-              />
-              <div className="flex justify-center">
-                <Button
-                  variant="secondary"
-                  onClick={handleCloseModal}
-                  className="w-1/2 py-2 rounded-full bg-gray-300 hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  variant="primary"
-                  onClick={handleConfirmarCodigo}
-                  className="w-1/2 py-2 rounded-full bg-blue-500 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ml-2"
-                >
+          <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+            <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm">
+              <h3 className="text-xl font-semibold mb-4">Confirmar Datos</h3>
+              <p>¿Confirmas que los datos ingresados son correctos?</p>
+              <p><strong>Código:</strong> {formData.codigo}</p>
+              <Form.Group className="mb-3">
+                <Form.Label>Ingrese el Código para Confirmar:</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={codigoIngresado}
+                  onChange={handleCodigoChange}
+                  className="mb-3"
+                />
+              </Form.Group>
+              <div className="flex justify-between">
+                <Button onClick={handleConfirmarCodigo} className="bg-blue-500 text-white rounded px-4 py-2">
                   Confirmar
+                </Button>
+                <Button onClick={handleCloseModal} className="bg-gray-500 text-white rounded px-4 py-2">
+                  Cancelar
                 </Button>
               </div>
             </div>
@@ -260,20 +263,19 @@ function EntregaBoletos() {
         )}
 
         {showCompletionAlert && (
-          <div className="fixed inset-0 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 shadow-lg max-w-md w-full">
-              <div className="flex items-center justify-center mb-4">
-                <FontAwesomeIcon icon={faCheckCircle} className="text-green-500 text-5xl mr-4" />
-                <h2 className="text-green-500 text-2xl font-bold">Entrega completada</h2>
-              </div>
+          <div className="fixed inset-0 flex items-center justify-center">
+            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
+              <strong className="font-bold">¡Éxito La entrega de boletos ha sido confirmada.!</strong>
+              <span className="block sm:inline">.</span>
             </div>
           </div>
         )}
 
         {showErrorAlert && (
-          <div className="fixed inset-0 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 shadow-lg max-w-md w-full">
-              <p className="text-center text-red-500 text-xl font-bold">{errorMessage}</p>
+          <div className="fixed inset-0 flex items-center justify-center">
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+              <strong className="font-bold">Error</strong>
+              <span className="block sm:inline">{errorMessage}</span>
             </div>
           </div>
         )}
