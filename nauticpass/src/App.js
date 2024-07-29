@@ -1,6 +1,6 @@
 // src/App.js
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import './App.css';
 import Login from './components/Login';
 import DashboardAdmi from './pages/DashboardAdmi';
@@ -9,42 +9,19 @@ import ConsultaColegas from './pages/ConsultaColegas';
 import EntregaBoletos from './pages/EntregaBoletos';
 import ConsultaEntrega from './pages/ConsultaEntrega';
 import DashboardColabo from './pages/DashboardColabo';
-import Navbar from './components/Navbar';
-import NavbarColabo from './components/NavbarColabo';
+import NavbarColaborador from './components/NavbarColaborador';
 import { AuthProvider, useAuth } from './AuthContext';
 
-// Componente para redirigir al usuario basado en el rol
-const RedirectBasedOnRole = () => {
-  const { role } = useAuth();
-  const navigate = useNavigate();
-  const [loading, setLoading] = React.useState(true);
-
-  React.useEffect(() => {
-    if (role === 'Administrador') {
-      navigate('/dashboard');
-    } else if (role === 'Colaborador') {
-      navigate('/dash');
-    }
-    setLoading(false);
-  }, [role, navigate]);
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  return null; // No renderiza nada
-};
-
+// Componente para manejar la redirección y mostrar el Navbar
 const NavbarHandler = () => {
-  const { role } = useAuth();
   const location = useLocation();
-
+  
   // No mostrar el navbar en la página de login
   if (location.pathname === '/login') {
     return null;
   }
 
-  return role === 'Administrador' ? <Navbar /> : <NavbarColabo />;
+  return <NavbarColaborador />;
 };
 
 function App() {
@@ -52,16 +29,14 @@ function App() {
     <AuthProvider>
       <Router>
         <div className="App">
-          <RedirectBasedOnRole />
           <Routes>
-            {/* Renderiza el NavbarHandler en cada ruta, excepto login */}
+            <Route path="/login" element={<Login />} />
             <Route
               path="*"
               element={
                 <>
                   <NavbarHandler />
                   <Routes>
-                    <Route path="/login" element={<Login />} />
                     <Route path="/dashboard" element={<DashboardAdmi />} />
                     <Route path="/consultacolegas" element={<ConsultaColegas />} />
                     <Route path="/entregaboletos" element={<EntregaBoletos />} />
