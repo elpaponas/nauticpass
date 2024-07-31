@@ -1,20 +1,11 @@
-// src/components/NavbarAdministrador.js
 import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { FiSettings } from 'react-icons/fi';
 import LogoutButton from './LogoutButton';
+import { useAuth } from '../AuthContext'; // Verifica que la ruta sea correcta
 
-const NavbarAdministrador = ({ role }) => {
-  const navigate = useNavigate();
-
-  // Redireccionar según el rol
-  const handleInicioClick = () => {
-    if (role === 'Colaborador') {
-      navigate('/dash'); // Redirigir a la ruta para colaboradores
-    } else {
-      navigate('/dashboard'); // Redirigir a la ruta para administradores
-    }
-  };
+const NavbarColaborador = () => {
+  const { role } = useAuth(); // Asegúrate de que `role` se obtenga correctamente
 
   return (
     <nav className="bg-gradient-to-r from-blue-600 to-purple-600 py-4 shadow-lg">
@@ -24,12 +15,7 @@ const NavbarAdministrador = ({ role }) => {
           <div className="text-white text-2xl font-bold">Sistema de Gestión de Boletos</div>
         </div>
         <div className="flex items-center space-x-6">
-          <button onClick={handleInicioClick} className="text-white hover:text-gray-200 transition duration-300 ease-in-out font-medium px-3 py-2 relative">
-            Inicio
-          </button>
-          {role === 'Administrador' && (
-            <CustomNavLink to="/usuariosistema">Usuarios del Sistema</CustomNavLink>
-          )}
+          <CustomNavLink to="/dash">Inicio</CustomNavLink>
           <CustomNavLink to="/consultacolegas">Consulta de Colegas</CustomNavLink>
           <CustomNavLink to="/consultaentregas">Historial de Boletos</CustomNavLink>
           <CustomNavLink to="/entregaboletos">Entrega de Boletos</CustomNavLink>
@@ -54,4 +40,4 @@ const CustomNavLink = ({ to, children }) => (
   </NavLink>
 );
 
-export default NavbarAdministrador;
+export default NavbarColaborador;

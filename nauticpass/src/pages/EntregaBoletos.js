@@ -30,9 +30,20 @@ function EntregaBoletos() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    if (name === 'colegaEntrega') {
+      const selectedUsuario = usuarios.find(usuario => `${usuario.nombres} ${usuario.apellidos}` === value);
+      if (selectedUsuario) {
+        setFormData({
+          ...formData,
+          colegaEntrega: `${selectedUsuario.nombres} ${selectedUsuario.apellidos}`
+    
+        });
+      }
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
-
+  
   const fetchColaboradorData = async () => {
     const { numeroColega } = formData;
     if (numeroColega !== '') {
@@ -157,18 +168,22 @@ function EntregaBoletos() {
               <Form.Group className="mb-3">
                 <Form.Label className="mb-1">Colega</Form.Label>
                 <Form.Control
-                  as="select"
-                  value={formData.colegaEntrega}
-                  onChange={handleChange}
-                  name="colegaEntrega"
-                  className="rounded-full px-3 py-2 border border-gray-300 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 w-full text-center"
-                  required
-                >
-                  <option value="">Seleccionar Colega</option>
-                  {usuarios.map(usuario => (
-                    <option key={usuario.id} value={usuario.nombres}>{usuario.nombres} {usuario.apellidos}</option>
-                  ))}
-                </Form.Control>
+  as="select"
+  value={formData.colegaEntrega}
+  onChange={handleChange}
+  name="colegaEntrega"
+  className="rounded-full px-3 py-2 border border-gray-300 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 w-full text-center"
+  required
+>
+  <option value="">Seleccionar Colega</option>
+  {usuarios.map(usuario => (
+    <option key={usuario.id} value={`${usuario.nombres} ${usuario.apellidos}`}>
+      {usuario.nombres} {usuario.apellidos}
+    </option>
+  ))}
+</Form.Control>
+
+
               </Form.Group>
               <Form.Group className="mb-3">
                 <Form.Label className="mb-1">Número de Colega</Form.Label>

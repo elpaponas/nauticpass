@@ -1,4 +1,3 @@
-// src/App.js
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import './App.css';
@@ -9,19 +8,26 @@ import ConsultaColegas from './pages/ConsultaColegas';
 import EntregaBoletos from './pages/EntregaBoletos';
 import ConsultaEntrega from './pages/ConsultaEntrega';
 import DashboardColabo from './pages/DashboardColabo';
+import NavbarAdministrador from './components/NavbarAdministrador';
 import NavbarColaborador from './components/NavbarColaborador';
 import { AuthProvider, useAuth } from './AuthContext';
 
 // Componente para manejar la redirección y mostrar el Navbar
 const NavbarHandler = () => {
   const location = useLocation();
-  
+  const { role, loading } = useAuth();
+
   // No mostrar el navbar en la página de login
   if (location.pathname === '/login') {
     return null;
   }
 
-  return <NavbarColaborador />;
+  if (loading) {
+    return <div>Loading...</div>; // Opcional: Puedes mostrar un indicador de carga aquí
+  }
+
+  // Renderiza el Navbar basado en el rol del usuario
+  return role === 'Administrador' ? <NavbarAdministrador /> : <NavbarColaborador />;
 };
 
 function App() {

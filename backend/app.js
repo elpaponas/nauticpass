@@ -117,25 +117,33 @@ app.post('/api/users', async (req, res) => {
   }
 });
 
-// Ruta para actualizar un usuario existente
+// Ruta para actualizar un usuario
 app.put('/api/users/:id', (req, res) => {
   const userId = req.params.id;
-  const { numeroColega, nombres, apellidos, puesto, role, usuario, password } = req.body;
-  const query = 'UPDATE usuarios SET numeroColega = ?, nombres = ?, apellidos = ?, puesto = ?, role = ?, usuario = ?, password = ? WHERE id = ?';
-  db.query(query, [numeroColega, nombres, apellidos, puesto, role, usuario, password, userId], (err, result) => {
+  const { numeroColega, nombres, apellidos, puesto, role, usuario, estado } = req.body;
+  
+  const query = `
+    UPDATE usuarios
+    SET numeroColega = ?, nombres = ?, apellidos = ?, puesto = ?, role = ?, usuario = ?, estado = ?
+    WHERE id = ?
+  `;
+
+  db.query(query, [numeroColega, nombres, apellidos, puesto, role, usuario, estado, userId], (err, result) => {
     if (err) {
-      console.error('Error updating user in database:', err);
-      res.status(500).json({ status: 'error', message: 'Error updating user in database' });
-      return;
+      console.error('Error updating the database:', err);
+      return res.status(500).json({ status: 'error', message: 'Error updating the database' });
     }
-    res.json({ status: 'success', message: 'User updated successfully', id: userId });
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ status: 'error', message: 'User not found' });
+    }
+    res.json({ status: 'success', message: 'User updated successfully' });
   });
 });
 
 // Ruta para habilitar un usuario
 app.put('/api/users/:id/enable', (req, res) => {
   const userId = req.params.id;
-  const query = 'UPDATE usuarios SET estado = true WHERE id = ?';
+  const query = 'UPDATE usuarios SET estado = 1 WHERE id = ?'; // Cambiado a 1 para habilitado
 
   db.query(query, [userId], (err, result) => {
     if (err) {
@@ -153,10 +161,11 @@ app.put('/api/users/:id/enable', (req, res) => {
   });
 });
 
+
 // Ruta para deshabilitar un usuario
 app.put('/api/users/:id/disable', (req, res) => {
   const userId = req.params.id;
-  const query = 'UPDATE usuarios SET estado = false WHERE id = ?';
+  const query = 'UPDATE usuarios SET estado = 2 WHERE id = ?'; // Cambiado a 2 para inhabilitado
 
   db.query(query, [userId], (err, result) => {
     if (err) {
@@ -167,13 +176,13 @@ app.put('/api/users/:id/disable', (req, res) => {
 
     if (result.affectedRows === 0) {
       res.status(404).json({ status: 'not_found', message: `User with id ${userId} not found` });
-
       return;
     }
 
     res.json({ status: 'success', message: 'User disabled successfully', id: userId });
   });
 });
+
 
 // Ruta para eliminar un usuario
 app.delete('/api/users/:id', (req, res) => {
@@ -188,6 +197,7 @@ app.delete('/api/users/:id', (req, res) => {
     res.json({ status: 'success', message: 'User deleted successfully', id: userId });
   });
 });
+
 
 // Ruta para obtener todas las entregas
 app.get('/api/entregas', (req, res) => {
@@ -216,38 +226,6 @@ app.post('/api/entregas', (req, res) => {
   });
 });
 
-// Ruta para eliminar una entrega
-app.delete('/api/entregas/:id', (req, res) => {
-  const entregaId = req.params.id;
-  const query = 'DELETE FROM entregas WHERE id = ?';
-  db.query(query, [entregaId], (err, result) => {
-    if (err) {
-      console.error('Error deleting delivery from database:', err);
-      res.status(500).json({ status: 'error', message: 'Error deleting delivery from database' });
-      return;
-    }
-    if (result.affectedRows === 0) {
-      res.status(404).json({ status: 'error', message: 'Delivery not found' });
-      return;
-    }
-    res.json({ status: 'success', message: 'Delivery deleted successfully', id: entregaId });
-  });
-});
-
-// Ruta para actualizar una entrega existente
-app.put('/api/entregas/:id', (req, res) => {
-  const entregaId = req.params.id;
-  const { colegaEntrega, numeroColega, nombres, apellidos, cantidad, fecha, tipoBoleto } = req.body;
-  const query = 'UPDATE entregas SET colegaEntrega = ?, numeroColega = ?, nombres = ?, apellidos = ?, cantidad = ?, fecha = ?, tipoBoleto = ? WHERE id = ?';
-  db.query(query, [colegaEntrega, numeroColega, nombres, apellidos, cantidad, fecha, tipoBoleto, entregaId], (err, result) => {
-    if (err) {
-      console.error('Error updating entrega in database:', err);
-      res.status(500).json({ status: 'error', message: 'Error updating entrega in database' });
-      return;
-    }
-    res.json({ status: 'success', message: 'Entrega updated successfully', id: entregaId });
-  });
-});
 
 
 // Ruta para obtener todos los colaboradores
@@ -345,7 +323,23 @@ app.get('/api/colaboradores/:numeroColega', (req, res) => {
   });
 });
 
+// Ruta para obtener todos los puestos
+app.get('/api/puestos', (req, res) => {
+  const query = 'SELECT id, nombre FROM puestos';
+  
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error al obtener los puestos:', err);
+      return res.status(500).json({ status: 'error', message: 'Error al obtener los puestos', details: err.message });
+    }
 
+    if (results.length === 0) {
+      return res.status(404).json({ status: 'not_found', message: 'No se encontraron puestos' });
+    }
+
+    res.json(results);
+  });
+});
 
 // Ejemplo de consulta SQL en Node.js
 app.get('/api/colaboradores/:numeroColega', async (req, res) => {
@@ -364,6 +358,8 @@ app.get('/api/colaboradores/:numeroColega', async (req, res) => {
   }
 });
 
+
+const router = express.Router();
 
 // Iniciar el servidor
 app.listen(port, () => {

@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faTrash, faFileExcel } from '@fortawesome/free-solid-svg-icons';
+import { faFileExcel } from '@fortawesome/free-solid-svg-icons';
 import * as XLSX from 'xlsx';
 
 function ConsultaEntrega() {
@@ -47,6 +46,7 @@ function ConsultaEntrega() {
       'Colega que Entrega': entrega.colegaEntrega,
       'Número de Colega': entrega.numeroColega,
       Nombre: `${entrega.nombres} ${entrega.apellidos}`,
+      'Puesto': entrega.puesto,
       'Boletos Entregados': entrega.cantidad,
       'Fecha de Entrega': formatDate(entrega.fecha),
       'Tipo de Boleto': entrega.tipoBoleto,
@@ -60,15 +60,20 @@ function ConsultaEntrega() {
   };
 
   const filteredEntregas = entregas.filter((entrega) => {
+    // Filtro por número de colega
     if (searchNumeroColega && !entrega.numeroColega.includes(searchNumeroColega)) {
       return false;
     }
+  
+    // Filtro por fecha
     if (searchStartDate && searchEndDate) {
-      const entregaDate = new Date(entrega.fecha);
-      const startDate = new Date(searchStartDate);
-      const endDate = new Date(searchEndDate);
+      const entregaDate = new Date(entrega.fecha).getTime();
+      const startDate = new Date(searchStartDate).getTime();
+      const endDate = new Date(searchEndDate).getTime() + 86400000 - 1; // Añadir un día menos 1 milisegundo
+
       return entregaDate >= startDate && entregaDate <= endDate;
     }
+  
     return true;
   });
 
@@ -116,6 +121,7 @@ function ConsultaEntrega() {
                 <th className="px-6 py-3 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Colega que Entrega</th>
                 <th className="px-6 py-3 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Número de Colega</th>
                 <th className="px-6 py-3 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Nombre</th>
+                <th className="px-6 py-3 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Puesto</th>
                 <th className="px-6 py-3 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Boletos Entregados</th>
                 <th className="px-6 py-3 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Fecha de Entrega</th>
                 <th className="px-6 py-3 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Tipo de Boleto</th>
@@ -127,6 +133,7 @@ function ConsultaEntrega() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">{entrega.colegaEntrega}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">{entrega.numeroColega}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">{entrega.nombres} {entrega.apellidos}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">{entrega.puesto}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">{entrega.cantidad}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">{formatDate(entrega.fecha)}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">{entrega.tipoBoleto}</td>
